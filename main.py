@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Request
 from mockData import product
+from dtos import ProductDTO
 
 app=FastAPI()
 
@@ -12,7 +13,7 @@ def home():
 def contact():
     return {"welcome to contact page"}
 
-@app.get("/products")
+@app.get("/product")
 def products():
     return product
 
@@ -35,3 +36,43 @@ def greet(request:Request):
     }
 
 
+@app.post("/create_product")
+def create_product(product_data:ProductDTO):
+    product_data=product_data.model_dump()
+    product.append(product_data)
+    return{"message":"product created successfully","data":product}
+
+
+@app.put("/update_product/{product_id}")
+def update_product(product_data: ProductDTO, product_id: int):
+
+    product_data = product_data.model_dump()
+
+    for index, oneProduct in enumerate(product):
+
+        if oneProduct.get("id") == product_id:
+
+            product[index] = product_data
+
+            return {
+                "message": "Product updated successfully...",
+                "product_data": product_data
+            }
+
+    return {
+        "message": "Product ID does not exist for this product"
+    }
+
+
+
+@app.delete("/delete_product/{product_id}")
+def delete_product(product_id:int):
+    for index , oneProduct in enumerate(product):
+        if(oneProduct.get("id")==product_id):
+            delete_product=product.pop(index)
+            return{"message":"product deleted successfully...","product":delete_product}
+        
+    
+    return{
+        "message":"product id not found"
+    }
